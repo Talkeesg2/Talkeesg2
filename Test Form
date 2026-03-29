@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الاختبار التفاعلي - التلخيص وكتابة الملخصات - اللغة العربية الوظيفية</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background-color: #f8f9fa; color: #333; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 25px; }
+        
+        /* تنسيق العداد */
+        .score-board { display: flex; justify-content: space-between; background-color: #eff6ff; border: 2px solid #bfdbfe; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px; font-weight: bold; font-size: 18px; color: #1e3a8a; }
+        .score-correct { color: #059669; font-size: 20px; }
+        .score-incorrect { color: #dc2626; font-size: 20px; }
+        .score-total { color: #2563eb; font-size: 20px; }
+
+        .print-btn { display: block; width: 100%; padding: 15px; background-color: #10b981; color: white; font-size: 18px; text-align: center; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 25px; transition: 0.3s; }
+        .print-btn:hover { background-color: #059669; }
+        
+        .submit-all-btn { display: block; width: 100%; padding: 15px; background-color: #3b82f6; color: white; font-size: 18px; text-align: center; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; font-weight: bold; transition: 0.3s; }
+        .submit-all-btn:hover { background-color: #2563eb; }
+
+        .question-card { border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 20px; background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .question-title { font-weight: bold; font-size: 18px; margin-bottom: 15px; color: #111827; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin-bottom: 10px; }
+        .options label { cursor: pointer; display: block; padding: 12px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 5px; transition: 0.2s; }
+        .options label:hover { background: #e5e7eb; }
+        input[type="radio"] { margin-left: 10px; transform: scale(1.2); }
+        .hint-btn { background-color: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 10px; transition: 0.3s; }
+        .hint-btn:hover { background-color: #2563eb; }
+        .hint-text { display: none; background-color: #eff6ff; color: #1e40af; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 14px; border: 1px solid #bfdbfe; }
+        .check-btn { background-color: #4b5563; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px; margin-right: 10px; font-size: 16px; transition: 0.3s; }
+        .check-btn:hover { background-color: #374151; }
+        .feedback { font-weight: bold; margin-top: 10px; display: none; padding: 10px; border-radius: 5px; }
+        
+        .final-summary { display: none; background-color: #ecfdf5; border: 2px solid #10b981; padding: 20px; border-radius: 8px; margin-top: 25px; font-weight: bold; font-size: 20px; color: #047857; text-align: center; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            .question-card { page-break-inside: avoid; border: 1px solid #000; background-color: white; }
+        }
+    </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>مشروع تلخيص التابع لشعبة 2</h1>
+    <h1>نموذج الاختبار التفاعلي - التلخيص وكتابة الملخصات</h1>
+    
+    <button class="print-btn no-print" onclick="window.print()">🖨️ طباعة الاسئلة فقط بدون الاجابات وحفظها كملف PDF</button>
+
+    <div class="score-board no-print">
+        <div>✅ إجابات صحيحة: <span id="correct-count" class="score-correct">0</span></div>
+        <div>❌ إجابات خاطئة: <span id="incorrect-count" class="score-incorrect">0</span></div>
+        <div>🏆 النتيجة: <span id="total-score" class="score-total">0</span> / <span id="max-score">0</span></div>
+    </div>
+
+    <div id="quiz-container"></div>
+
+    <button class="submit-all-btn no-print" onclick="submitAll()">✅ تقديم كل الإجابات وإظهار النتيجة</button>
+    
+    <div id="final-summary" class="final-summary no-print"></div>
+
+  </div>
+
+<script>
+    const questions = [
+        { q: "ما هو عنوان الموضوع الخامس في هذا المقرر؟", options: ["علامات الترقيم", "التلخيص وكتابة الملخصات", "الأساليب النحوية", "الأخطاء الشائعة"], answer: 1, hint: "يركز على مهارة استخلاص المعلومات الأساسية." },
+        { q: "مفهوم التلخيص هو:", options: ["إضافة معلومات جديدة للنص", "شرح معاني المفردات", "صورة مركزة عن النص الأصلي تظهر الأفكار الرئيسة", "كتابة النص بأسلوب مختلف مع زيادة حجمه"], answer: 2, hint: "تعبير عن الأفكار بعبارات قليلة لا تخل بالمضمون." },
+        { q: "التلخيص هو تعبير عن الأفكار الأساسية بعبارات قليلة:", options: ["لا تخل بالمضمون", "تغير المعنى الأصلي", "تزيد من الغموض", "تتجاهل تسلسل النص"], answer: 0, hint: "يجب أن يحافظ على جوهر الفكرة." },
+        { q: "من أسس التلخيص:", options: ["إضافة أفكار الكاتب الخاصة", "إيراد الأفكار الأساسية كاملة", "التركيز على التفرعات", "كتابة النص بأسلوب الكاتب الأصلي"], answer: 1, hint: "لا يصح التلخيص بحذف ركن أساسي من أركان الفكرة." },
+        { q: "ترتيب الأفكار في التلخيص يكون:", options: ["عشوائياً", "حسب الأهمية فقط", "بحسب تسلسلها في النص الأصلي", "من الأقصر إلى الأطول"], answer: 2, hint: "يحافظ الملخص على هيكل النص كما بناه الكاتب." },
+        { q: "في التلخيص، يجب ترتيب الأفكار بأسلوب:", options: ["كاتب النص الأصلي", "الملخِّص", "معقد وغامض", "الكُتاب القدامى"], answer: 1, hint: "يستخدم الشخص الذي يقرأ النص كلماته الخاصة." },
+        { q: "عند التلخيص يجب البعد عن:", options: ["الأفكار الأساسية", "تسلسل النص", "الأفكار الخاصة والمعلومات الجديدة", "الإيجاز"], answer: 2, hint: "يمنع تدخل الملخِّص برأيه الشخصي." },
+        { q: "من أسس التلخيص إهمال:", options: ["الأفكار الرئيسة", "التعليلات والتفرعات والاستدلالات", "الجمل المفيدة", "الإملاء الصحيح"], answer: 1, hint: "التفاصيل الدقيقة والقصص الجانبية تُحذف." },
+        { q: "الخطوة الأولى في التلخيص الفعال هي:", options: ["تسجيل الأفكار في ورقة", "قراءة النص قراءة سريعة", "الربط بين الأفكار", "المراجعة"], answer: 1, hint: "لأخذ فكرة عامة قبل البدء بالعمل." },
+        { q: "الهدف من القراءة السريعة قبل التلخيص هو:", options: ["حفظ النص", "تحديد الأخطاء الإملائية", "معرفة فحوى النص وتسلسل أفكاره", "صياغة الأفكار النهائية"], answer: 2, hint: "الاستطلاع العام للمحتوى." },
+        { q: "الخطوة الثانية (إعادة قراءة النص قراءة متأنية) تهدف إلى:", options: ["تحديد الأفكار الأساسية", "حفظ الكلمات الصعبة", "كتابة المراجعة النهائية", "إضافة أفكار جديدة"], answer: 0, hint: "التركيز والغوص في المعاني." },
+        { q: "أثناء القراءة المتأنية، يُنصح بوضع خط تحت:", options: ["الكلمات المترادفة", "بدء كل فكرة", "الأمثلة فقط", "أسماء الأعلام"], answer: 1, hint: "ليسهل الرجوع إليها عند الصياغة." },
+        { q: "أين يتم تسجيل الأفكار الرئيسة كخطوة مبدئية؟", options: ["في بداية النص", "في حاشية الورقة", "في كتاب آخر", "على السبورة"], answer: 1, hint: "مساحة بيضاء جانبية قريبة من النص الأصلي." },
+        { q: "بعد تسجيل الأفكار في الحاشية، يتم:", options: ["صياغة الأفكار الأساسية في ورقة أخرى", "حفظها كما هي وتقديمها", "حذف نصفها عشوائياً", "نسيانها"], answer: 0, hint: "نقل الأفكار لبدء تكوين الملخص." },
+        { q: "عند الربط بين الأفكار المصاغة، يُفضل جعلها في:", options: ["عدة فصول", "نقاط متباعدة", "فقرة واحدة قدر الإمكان", "جدول"], answer: 2, hint: "لتكون قطعة متماسكة ومترابطة." },
+        { q: "الهدف من خطوة 'المراجعة' في التلخيص هو التأكد من:", options: ["إضافة معلومات خارجية", "إيراد الأفكار الرئيسة جميعها وتسلسلها", "تغيير المعنى الأصلي", "زيادة عدد الكلمات"], answer: 1, hint: "الضبط الأخير لعملية التلخيص." },
+        { q: "في خطوة المراجعة، يجب التأكد من عدم:", options: ["إيراد الأفكار الأساسية", "تسلسل الأفكار", "إعادة الكلمات بنصها أو لفظها", "الإيجاز"], answer: 2, hint: "كما قلنا سابقاً: استخدم أسلوبك أنت." },
+        { q: "كم عدد مستويات التلخيص المذكورة في المقرر؟", options: ["مستوى واحد", "مستويان", "ثلاثة مستويات", "أربعة مستويات"], answer: 1, hint: "العادي والمركز." },
+        { q: "في التلخيص العادي، يصل قدر المادة الملخصة إلى:", options: ["ربع المادة الأصلية", "عشر المادة الأصلية", "نصف قدر المادة الأصلية أو أكثر بقليل", "نفس حجم المادة الأصلية"], answer: 2, hint: "حوالي 50 إلى 60%." },
+        { q: "نسبة التلخيص العادي تتراوح بين:", options: ["10 إلى 20%", "25 إلى 30%", "50 إلى 60%", "80 إلى 90%"], answer: 2, hint: "النصف تقريباً." },
+        { q: "في التلخيص العادي، يُعنى الكاتب بـ:", options: ["التفاصيل الدقيقة جداً", "الأفكار الأساسية والجمل الرئيسة", "الأمثلة والشواهد", "الهوامش فقط"], answer: 1, hint: "يستخرج زبدة الحديث." },
+        { q: "في التلخيص العادي تُحذف:", options: ["الأفكار الأساسية", "الجمل الرئيسة", "البديهيات والأمثلة والعموميات والمترادفات", "العناوين"], answer: 2, hint: "الزوائد والحشو يتم استبعادها." },
+        { q: "اختصار عبارة (قام بتوقيع اتفاق) إلى (اتفق) يُعد تطبيقاً لـ:", options: ["زيادة الغموض", "كتابة العبارات بإيجاز", "التلخيص المركز", "تحريف المعنى"], answer: 1, hint: "الوصول للفعل المباشر بأقل عدد من الكلمات." },
+        { q: "في التلخيص العادي، الكلمات التي تدل على أعداد يتم:", options: ["حذفها تماماً", "كتابتها بالحروف كما هي", "وضع أرقام محلها", "تكرارها مرتين"], answer: 2, hint: "الأرقام أسرع في القراءة وأوفر في المساحة." },
+        { q: "في التلخيص المركز، يصل قدر المادة الملخصة إلى:", options: ["نصف قدر المادة الأصلية", "ربع قدر المادة الأصلية أو أكثر بقليل", "ثلثي المادة", "نفس حجم المادة الأصلية"], answer: 1, hint: "أصغر من التلخيص العادي." },
+        { q: "نسبة التلخيص المركز تتراوح بين:", options: ["25 إلى 30%", "50 إلى 60%", "10 إلى 15%", "70 إلى 80%"], answer: 0, hint: "الربع تقريباً." },
+        { q: "أهم ما يجب أن يُعنى فيه الكاتب في التلخيص المركز هو:", options: ["تغيير المعنى", "سلامة المعنى وتطابقه مع النص الأصلي", "إضافة الأمثلة", "الإطالة في الشرح"], answer: 1, hint: "يجب ألا يؤدي الضغط الشديد للنص لضياع المعنى." },
+        { q: "من فوائد التلخيص للطلاب قبيل الاختبار:", options: ["حفظ الكتاب كاملاً بصعوبة", "مراجعة المعلومات الكثيرة في زمن قصير", "تجاهل المقرر", "زيادة التوتر"], answer: 1, hint: "يسهل استرجاع المعلومات بفاعلية." },
+        { q: "التلخيص يُعوِّد القارئ على:", options: ["القراءة السطحية", "نسيان التفاصيل", "الاستيعاب والتمعن", "تضييع الوقت"], answer: 2, hint: "لأنه يضطر لفهم ما يقرأ قبل اختصاره." },
+        { q: "كتابة الملخصات تُعد ممارسة عملية على:", options: ["صياغة المفاهيم", "النقل الحرفي", "الكتابة الإملائية الخاطئة", "تشتيت الانتباه"], answer: 0, hint: "تمرين عقلي على بناء الأفكار." },
+        { q: "يُعد التلخيص مهماً في عصر السرعة لأنه:", options: ["يزيد من كمية الورق", "يوفر الوقت والجهد", "يطيل فترة القراءة", "يعقد المعلومات"], answer: 1, hint: "نحصل على المعلومة بأسرع طريقة." },
+        { q: "أثناء عملية استخراج المعلومات لتلخيصها، المعلومات التي ارتباطها ضعيف:", options: ["تُعرض كاملة", "يُشار إليها بإيجاز", "تُستبعد", "تُكرر"], answer: 2, hint: "لأنها تعتبر غير أساسية (حشو)." },
+        { q: "أثناء عملية استخراج المعلومات، المعلومات المهمة والأساسية:", options: ["تُستبعد", "تُحذف", "تبقى", "تُهمل"], answer: 2, hint: "هي صلب الملخص." },
+        { q: "المعلومات الأساسية التي (تبقى) إما أن تُعرض كاملة أو:", options: ["تُحذف نصفها", "يُشار إليها بإيجاز", "تُكتب بلغة أجنبية", "تُنقل بحرفيتها دائماً"], answer: 1, hint: "حسب أهميتها الشديدة." },
+        { q: "في التطبيق العملي المذكور في المادة حول (أضرار التدخين)، تم تلخيص الأضرار إلى:", options: ["أضرار صحية واجتماعية واقتصادية", "أضرار بيئية فقط", "أضرار على كبار السن فقط", "لا توجد أضرار للتدخين"], answer: 0, hint: "المجالات الثلاثة الرئيسية التي يؤثر فيها التدخين." }
+    ];
+
+    const container = document.getElementById('quiz-container');
+    document.getElementById('max-score').innerText = questions.length;
+    
+    // مصفوفة لتتبع حالة كل سؤال (true: صح، false: خطأ، null: لم تتم الإجابة)
+    const answersState = new Array(questions.length).fill(null);
+
+    questions.forEach((q, index) => {
+        let optionsHtml = '';
+        q.options.forEach((opt, optIndex) => {
+            optionsHtml += `
+                <li>
+                    <label>
+                        <input type="radio" name="q${index}" value="${optIndex}">
+                        ${opt}
+                    </label>
+                </li>
+            `;
+        });
+
+        const qHtml = `
+            <div class="question-card">
+                <div class="question-title">س${index + 1}: ${q.q}</div>
+                <ul class="options no-print">${optionsHtml}</ul>
+                <div class="no-print">
+                    <button class="hint-btn" onclick="toggleHint(${index})">💡 إظهار التلميح</button>
+                    <button class="check-btn" onclick="checkAnswer(${index}, ${q.answer})">✅ تحقق من الإجابة</button>
+                    <div id="hint${index}" class="hint-text">التلميح: ${q.hint}</div>
+                    <div id="feedback${index}" class="feedback"></div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += qHtml;
+    });
+
+    function toggleHint(index) {
+        const hintEl = document.getElementById(`hint${index}`);
+        hintEl.style.display = hintEl.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function checkAnswer(index, correctIndex) {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        const feedbackEl = document.getElementById(`feedback${index}`);
+        feedbackEl.style.display = 'block';
+
+        if (!selected) {
+            feedbackEl.style.backgroundColor = '#fffbeb';
+            feedbackEl.style.color = '#b45309';
+            feedbackEl.innerText = 'الرجاء اختيار إجابة أولاً.';
+            return;
+        }
+
+        if (parseInt(selected.value) === correctIndex) {
+            feedbackEl.style.backgroundColor = '#ecfdf5';
+            feedbackEl.style.color = '#047857';
+            feedbackEl.innerText = 'إجابة صحيحة! ممتاز.';
+            answersState[index] = true;
+        } else {
+            feedbackEl.style.backgroundColor = '#fef2f2';
+            feedbackEl.style.color = '#b91c1c';
+            feedbackEl.innerText = 'إجابة خاطئة، حاول مرة أخرى.';
+            answersState[index] = false;
+        }
+        
+        updateScoreBoard();
+    }
+
+    function updateScoreBoard() {
+        const correctCount = answersState.filter(state => state === true).length;
+        const incorrectCount = answersState.filter(state => state === false).length;
+        
+        document.getElementById('correct-count').innerText = correctCount;
+        document.getElementById('incorrect-count').innerText = incorrectCount;
+        document.getElementById('total-score').innerText = correctCount;
+    }
+
+    function submitAll() {
+        let unanswered = 0;
+        
+        questions.forEach((q, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const feedbackEl = document.getElementById(`feedback${index}`);
+            feedbackEl.style.display = 'block';
+
+            if (!selected) {
+                feedbackEl.style.backgroundColor = '#fffbeb';
+                feedbackEl.style.color = '#b45309';
+                feedbackEl.innerText = 'لم تتم الإجابة على هذا السؤال.';
+                answersState[index] = null;
+                unanswered++;
+            } else if (parseInt(selected.value) === q.answer) {
+                feedbackEl.style.backgroundColor = '#ecfdf5';
+                feedbackEl.style.color = '#047857';
+                feedbackEl.innerText = 'إجابة صحيحة! ممتاز.';
+                answersState[index] = true;
+            } else {
+                feedbackEl.style.backgroundColor = '#fef2f2';
+                feedbackEl.style.color = '#b91c1c';
+                feedbackEl.innerText = 'إجابة خاطئة! (الإجابة الصحيحة: ' + q.options[q.answer] + ')';
+                answersState[index] = false;
+            }
+        });
+
+        updateScoreBoard();
+
+        const correctCount = answersState.filter(state => state === true).length;
+        const finalSummary = document.getElementById('final-summary');
+        finalSummary.style.display = 'block';
+        
+        if(correctCount === questions.length) {
+            finalSummary.innerHTML = `🎉 ممتاز! لقد أجبت على جميع الأسئلة بشكل صحيح. النتيجة: ${correctCount} / ${questions.length}`;
+            finalSummary.style.backgroundColor = '#ecfdf5';
+            finalSummary.style.color = '#047857';
+            finalSummary.style.borderColor = '#10b981';
+        } else {
+            finalSummary.innerHTML = `📊 نتيجة الاختبار: ${correctCount} إجابات صحيحة من أصل ${questions.length}.<br><span style="font-size: 16px; color: #b91c1c;">(يرجى مراجعة الأسئلة الخاطئة أو التي لم يُجب عليها في الأعلى)</span>`;
+            finalSummary.style.backgroundColor = '#fffbeb';
+            finalSummary.style.color = '#b45309';
+            finalSummary.style.borderColor = '#f59e0b';
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+  <div class="container no-print" style="text-align: center; margin-top: 20px; box-shadow: none; background: transparent;">
+    <h1 style="border-bottom: none; color: #1e3a8a;">وفقكم الله🤲</h1>
+    <h1 style="border-bottom: none; color: #1e3a8a;">📚 مشروع تلخيص التابع لشعبة 2 📚</h1>
+    <h1 style="border-bottom: none; color: #1e3a8a;">هذا الملخّص والاختبار قد صنع لكم بحب💖</h1>
+  </div>
+</body>
+</html>
